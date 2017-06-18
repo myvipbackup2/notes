@@ -274,6 +274,8 @@ ES6 对象提供了`Object.assign()`这个方法来实现浅复制。`Object.ass
 const obj = Object.assign({}, objA, objB)
 ```
 
+***
+
 ### 5.更方便的数据访问--解构(很有用)
 
 数组和对象是JS中最常用也是最重要表示形式。为了简化提取信息，ES6新增了解构，这是将一个数据结构分解为更小的部分的过程。  
@@ -305,6 +307,8 @@ var people = {
     console.log(first) //'red'
     console.log(second) //'blue'
 ```
+
+***
 
 ### 6.Spread Operator 展开运算符(rest参数)
 
@@ -339,8 +343,7 @@ ES6 引入 rest 参数（形式为“...变量名”），用于获取函数的�
         address: 'shanghai'
     }
     const { username, ...rest } = user
-    console.log(rest) //{"address": "shanghai", "age": 22, "gender": "female"
-}
+    console.log(rest) //{"address": "shanghai", "age": 22, "gender": "female"}
 ```
 
 对于 Object 而言，还可以用于组合成新的 Object 。(ES2017 stage-2 proposal) 当然如果有重复的属性名，右边覆盖左边
@@ -424,6 +427,7 @@ export class App extend Component {
 
 > 这里的 from './people' 或者 * as _ 只是做个例子，大家按照实际文件名导入或导出  
 
+***
 
 ### 8. Promise  
 
@@ -443,3 +447,202 @@ fetch('/api/todo')
       .then(data => ({ data }))
       .catch(err => ({ err }));
 ```
+
+> 今天看到一篇关于面试题的很有意思。  
+
+```javascript
+setTimeout(function() {
+     console.log(1)
+   }, 0);
+   new Promise(function executor(resolve) {
+     console.log(2);
+     for( var i=0 ; i<10000 ; i++ ) {
+       i == 9999 && resolve();
+     }
+     console.log(3);
+   }).then(function() {
+     console.log(4);
+   });
+   console.log(5);
+```
+
+> [Excuse me？这个前端面试在搞事！](https://zhuanlan.zhihu.com/p/25407758)
+
+当然以上promise的知识点，这个只是冰山一角。需要更多地去学习应用。公司里会使用`async`和`await`结合`promise`一起使用，下一节我会介绍。  
+
+***
+
+### 9.async 函数  
+
+> ES2017 标准引入了 async 函数，使得异步操作变得更加方便。
+>
+> async 函数是什么？一句话，它就是 Generator 函数的语法糖。
+
+简单的来说 `async` 函数就是将 `Generator` 函数的星号 `*` 替换成 `async`，将 `yield` 替换成 `await`，仅此而已。  
+
+具体介绍大家请看 [阮一峰老师写的](http://es6.ruanyifeng.com/?search=promise&x=0&y=0#docs/async) ，我在这里就不过多的介绍了。  
+
+**async/await 小技巧**  
+
+#### sleep 函数
+
+以前只接使用 `setTimeout` 和回调函数实现一个 `sleep` 会有很多的副作用，用起来很不方便。
+
+所以让 `setTimeout` 搭配使用 `async/await`
+
+```javascript
+const sleep = delay => {
+  return new Promise(resolve => {
+    setTimeout(resolve, delay)
+  })
+}
+
+const fn = async _ => {
+  console.log('starting....')
+  await sleep(1000)
+  console.log('after sleeping for 1 second')
+}
+```
+
+#### 搭配 map() 函数
+
+在 `map` 中引入异步处理:  
+
+```javascript
+const arr = [1,2,3,4,5]
+const asyncFn = data => {
+  // 异步处理函数
+}
+
+const results = arr.map(async num => {
+  await asyncFn(num)
+  return ++num
+})
+
+console.log(results) //[2, 3, 4, 5, 6]
+```
+
+#### 使用 await 代替 then() 函数  
+
+上面的例子最后使用了 `Promise.all` 还是回到了使用回调函数的方式
+
+这个也很好解决，只需要在外层再加一个 `async` 函数  
+
+```javascript
+const main = async _ => {
+  const results = await; Promise.all(arr.map(num => {
+    await asyncFn();
+    return ++num;
+  }))
+  console.log(results);
+}
+
+main();
+```  
+
+### 搭配 reduce() 函数
+
+通过引入 `async/await` 可以把 `reduce` 扩展成一个按顺序执行异步函数的工具
+
+`reduce` 用起来很简单:  
+
+```javascript
+const arr = [1,2,3,4,5];
+const result = arr.reduce((prev, next) => {
+  return prev+next;
+}, 0)
+
+console.log(result);
+```
+
+像 `map` 函数一样引入 `async/await` :  
+
+```javascript
+const main = async _ => {
+  const result = await arr.reduce(async (prev, next) => {
+    const tmp = await prev;
+    return tmp + next;
+  }, Promise.resolve(0));
+  console.log(result);
+}
+
+main();
+```
+
+而且还可以在 `reduce` 内部加入异步函数:  
+
+```javascript
+const arr = [1,2,3,4,5];
+const main = async _ => {
+  const result = await arr.reduce(async (prev, next) => {
+    const tmp = await prev;
+
+    // 异步处理 暂停1s
+    await sleep(1000);
+    console.log(tmp + next);
+
+    return tmp + next
+  }, Promise.resolve(0));
+}
+
+main();
+```
+
+上述代码会每隔一秒依次打出 1 3 6 10 15
+
+> 参考自  
+> https://github.com/ccforward/cc/issues/6   
+> http://fred-zone.blogspot.hk/2017/04/javascript-asyncawait.html  
+> http://2ality.com/2016/10/async-function-tips.html
+
+***
+
+### 10.Set和Map数据结构(面试数组去重的简便方法)
+
+>ES6 提供了新的数据结构 Set。它类似于数组，但是成员的值都是唯一的，没有重复的值。
+
+>Set 本身是一个构造函数，用来生成 Set 数据结构。
+
+详细介绍请看 阮一峰 老师写的[Set和Map数据结构](http://es6.ruanyifeng.com/?search=promise&x=0&y=0#docs/set-map)  
+
+让我们直接上代码来看吧：
+
+```javascript
+// 例一
+const set = new Set([1, 2, 3, 4, 4]);
+console.log([...set]);// [1, 2, 3, 4]
+
+// 例二
+const items = new Set([1, 2, 3, 4, 5, 5, 5, 5]);
+console.log(items.size); // 5
+
+// 例三
+function divs () {
+  return [...document.querySelectorAll('div')];
+}
+
+const set = new Set(divs());
+console.log(set.size); // 56
+
+// 类似于
+divs().forEach(div => set.add(div));
+console.log(set.size); // 56
+```
+让我们来看一道面试题：
+
+> 例如： 'abcabcbb'去重后没有重复字符的最长子串 'abc' 结果为：3  
+
+```javascript
+//使用Set很方便的就可以完成
+const str = 'abcabcbb';
+const newStr = new Set(str);
+console.log(newStr.size);  //3
+```
+有没有很简单？
+
+***
+
+### 总结
+
+ES6的特性远不止于此!但对于我们日常的开发开说。这些估计已经够用了，但是还有很多有意思的方法。  
+比如findIndex...等等。包括用`set`来完成面试题常客数组去重问题。我和我的小伙伴们都惊呆了!
