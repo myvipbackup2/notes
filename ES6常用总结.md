@@ -642,6 +642,97 @@ console.log(newStr.size);  //3
 
 ***
 
+### 11. Object.assign (对象拷贝问题)
+
+> Object.assign() 方法用于将所有可枚举的属性的值从一个或多个源对象复制到目标对象。它将返回目标对象。
+
+> 详细用法和说明请查看文档：[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
+
+我们废话不多说直接上代码，小伙伴们应该很容易理解
+
+**示例**
+
+复制一个 object：
+
+```javascript
+var obj = { a: 1 };
+var copy = Object.assign({}, obj);
+console.log(copy); // { a: 1 }
+```
+
+深度拷贝问题
+
+针对深度拷贝，需要使用其他方法，因为 `Object.assign()`拷贝的是属性值。假如源对象的属性值是一个指向对象的引用，它也只拷贝那个引用值。
+
+```javascript
+function test() {
+  let a = { b: {c:4} , d: { e: {f:1}} }
+  let g = Object.assign({},a)
+  let h = JSON.parse(JSON.stringify(a));
+  console.log(g.d) // { e: { f: 1 } }
+  g.d.e = 32
+  console.log('g.d.e set to 32.') // g.d.e set to 32.
+  console.log(g) // { b: { c: 4 }, d: { e: 32 } }
+  console.log(a) // { b: { c: 4 }, d: { e: 32 } }
+  console.log(h) // { b: { c: 4 }, d: { e: { f: 1 } } }
+  h.d.e = 54
+  console.log('h.d.e set to 54.') // h.d.e set to 54.
+  console.log(g) // { b: { c: 4 }, d: { e: 32 } }
+  console.log(a) // { b: { c: 4 }, d: { e: 32 } }
+  console.log(h) // { b: { c: 4 }, d: { e: 54 } }
+}
+test();
+```
+
+合并 objects:
+
+```javascriptt
+let o1 = { a: 1 };
+let o2 = { b: 2 };
+let o3 = { c: 3 };
+
+let obj = Object.assign(o1, o2, o3);
+console.log(obj); // { a: 1, b: 2, c: 3 }
+console.log(o1);  // { a: 1, b: 2, c: 3 }, 注意目标对象自身也会改变。
+```
+
+**来上一道面试题：**
+>撰写find函数，实现：  
+>
+> ```javascript
+>   var obj = {a:{b:{c:1}}};
+>   find(obj, 'a.b.c')  //1
+>   find(obj, 'a.b.c')  //undefined
+> ```
+
+废话不多说直接上代码，若有不正确的地方欢迎指正：
+
+```javascript
+    let obj = {a: {b: {c: 1}}};
+    function find(obj, str) {
+        let result = Object.assign({}, obj);
+        let arr = str.split('.');
+        for (let i = 0, len = arr.length; i < len; i++) {
+            result = result[arr[i]]
+        }
+        return result;
+    }
+    console.log(find(obj, 'a.b.c'))  //1
+```
+```javascript
+    let obj = {a: {b: {c: 1}}};
+    function find(obj, str) {
+        let result = Object.assign({}, obj);
+        return newObj[str]
+    }
+    console.log(find(obj, 'a.b.c'))  //undefined
+```
+一开始我是用后面那个简便的方法的，以为obj["prop"]可以直接取到结果1，结果出来却是`undefined`，估计面试官问的也是这个吧？后来老老实实用递归出来，如果有更简便的方法欢迎issue。
+
+> 详细用法和说明请查看文档：[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
+
+***
+
 ### 总结
 
 ES6的特性远不止于此!但对于我们日常的开发开说。这些估计已经够用了，但是还有很多有意思的方法。  
