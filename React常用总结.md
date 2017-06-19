@@ -98,6 +98,72 @@ React.createElement("div", {id: if (condition) { 'msg' }}, "Hello World!");
 if (condition) { <div id='msg'>Hello World!</div> } else { <div>Hello World!</div> }
 ```
 
+#### **注意JSX有坑**  
+
+**style属性**
+
+在React中写行内样式时，要这样写，不能采用引号的书写方式：
+
+```javascript
+//right way
+React.render(
+    <div style={{color:'red'}}>  //第一个{}代表解析js，第二个{}代表样式对象
+        xxxxx
+    </div>,
+    document.body
+);
+```
+
+初学者很容易进入这个坑：
+```javascript
+//wrong way
+style="opacity:{this.state.opacity};"
+```
+
+这样写才是正确的：
+```javascript
+//right way
+style={{opacity: this.state.opacity}}
+```
+
+**HTML转义**
+
+比如我们有一些内容是用户输入的富文本，从后台取到数据后展示在页面上，希望展示相应的样式：
+
+```javascript
+let content='<strong>content</strong>';
+
+React.render(
+    <div>{content}</div>,
+    document.body
+);
+```
+
+但是结果和我们想象的并不一样：
+
+```html
+//html
+<strong>content</strong>
+```
+
+因为 React 默认会进行HTML的转义，避免XSS攻击，如果不需要转义，可以这么写：
+
+```javascript
+let content='<strong>content</strong>';    
+
+React.render(
+    <div dangerouslySetInnerHTML={{__html: content}}></div>,
+    document.body
+);
+```
+
 更多JSX的知识这里就不做过多的介绍了，大家自行Google。  
 
 ***
+
+### 5. React 组件
+
+> 现  
+
+
+### 6. React 无状态组件
