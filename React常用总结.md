@@ -10,6 +10,8 @@ Github地址：<https://github.com/facebook/react>
 
 掘进翻译的ReactJS中文文档：<https://discountry.github.io/react/>
 
+React性能优化:<https://discountry.github.io/react/docs/optimizing-performance.html>
+
 --------------------------------------------------------------------------------
 
 ## 2\. React 和 Vue
@@ -817,3 +819,55 @@ function calculateWinner(squares) {
 > 我在这里就只贴出js代码，请自行查看：<br>
 > [完整教程](https://discountry.github.io/react/tutorial/tutorial.html#开始编码)<br>
 > [完整代码以及效果](https://codepen.io/gaearon/pen/gWWZgR?editors=0010)
+
+--------------------------------------------------------------------------------
+
+## 8\. ReactJS 组件生命周期
+
+每一个组件都有几个你可以重写以让代码在处理环节的特定时期运行的"生命周期方法"。方法中带有前缀 `will` 的在特定环节之前被调用，而带有前缀 `did` 的方法则会在特定环节之后被调用。
+
+**装配**
+
+这些方法会在组件实例被创建同时插入DOM中被调用：
+
+- constructor()
+- componentWillMount()
+- render()
+- componentDidMount()
+
+**更新**
+
+属性或状态的改变会触发一次更新。当一个组件在被重渲时，这些方法将会被调用：
+
+- componentWillReceiveProps()
+- shouldComponentUpdate()
+- componentWillUpdate()
+- render()
+- componentDidUpdate()
+
+**卸载**
+
+当一个组件被从DOM中移除时，该方法别调用：
+
+- componentWillUnmount()
+
+**其他API**
+
+每一个组件还提供了其他的API：
+
+- setState()
+- forceUpdate()
+
+**类属性**
+
+- defaultProps
+- displayName
+
+**实例属性**
+
+- props
+- state
+
+**注意!!!**
+
+若 `shouldComponentUpdate()` 返回`false`，`render()`函数将不会被调用。
