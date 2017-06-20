@@ -1,7 +1,5 @@
 # 最近学习React的一些总结和经验
 
---------------------------------------------------------------------------------
-
 ## 1\. ReactJS简介
 
 > React 起源于 Facebook 的内部项目，因为该公司对市场上所有 JavaScript MVC 框架，都不满意，就决定自己写一套，用来架设 Instagram 的网站。做出来以后，发现这套东西很好用，就在2013年5月开源了。由于 React 的设计思想极其独特，属于革命性创新，性能出众，代码逻辑却非常简单。所以，越来越多的人开始关注和使用，认为它可能是将来 Web 开发的主流工具。
@@ -9,6 +7,8 @@
 ReactJS官网地址：<http://facebook.github.io/react/>
 
 Github地址：<https://github.com/facebook/react>
+
+掘进翻译的ReactJS中文文档：<https://discountry.github.io/react/>
 
 --------------------------------------------------------------------------------
 
@@ -189,7 +189,7 @@ React.render(
 
 言归正传，在 React 中创建组件有三种方式
 
-1. 函数式定义的无状态组件
+1. 纯函数式定义的无状态组件
 2. ES5原生方式`React.createClass`定义的组件
 3. ES6形式的 `extends React.Component`定义的组件
 
@@ -214,19 +214,19 @@ ReactDOM.render(<HelloComponent name="LZX" />, mountNode)
 
 无状态组件的创建形式使代码的可读性更好，并且减少了大量冗余的代码，精简至只有一个`render`方法，大大的增强了编写一个组件的便利，除此之外无状态组件还有以下几个显著的特点：
 
-1. **组件不会被实例化，整体渲染性能得到提升**
+- **组件不会被实例化，整体渲染性能得到提升**
 
 因为组件被精简成一个`render`方法的函数来实现的，由于是无状态组件，所以无状态组件就不会在有组件实例化的过程，无实例化过程也就不需要分配多余的内存，从而性能得到一定的提升。
 
-1. **组件不能访问 this 对象**
+- **组件不能访问 this 对象**
 
 无状态组件由于没有实例化过程，所以无法访问组件this中的对象，例如：this.ref、this.state等均不能访问。若想访问就不能使用这种形式来创建组件。
 
-1. **组件无法访问生命周期的方法**
+- **组件无法访问生命周期的方法**
 
 因为无状态组件是不需要组件生命周期管理和状态管理，所以底层实现这种形式的组件时是不会实现组件的生命周期方法。所以无状态组件是不能参与组件的各个生命周期管理的。
 
-1. **无状态组件只能访问输入的 props ，同样的 props 会得到同样的渲染结果，不会有副作用**
+- **无状态组件只能访问输入的 props ，同样的 props 会得到同样的渲染结果，不会有副作用**
 
 无状态组件被鼓励在大型项目中尽可能以简单的写法来分割原本庞大的组件，未来React也会这种面向无状态组件在譬如无意义的检查和内存分配领域进行一系列优化，所以只要有可能，**尽量使用无状态组件**。
 
@@ -535,17 +535,285 @@ const Contacts = React.createClass({
 
 ### 那么到底选择哪种方式创建组件？
 
-由于React团队已经声明`React.createClass`最终会被`React.Component`的类形式所取代。  
-但是在找到`Mixins`替代方案之前是不会废弃掉`React.createClass`形式。所以：  
+由于React团队已经声明`React.createClass`最终会被`React.Component`的类形式所取代。<br>
+但是在找到`Mixins`替代方案之前是不会废弃掉`React.createClass`形式。所以：
 
-能用`React.Component`创建的组件的就尽量不用`React.createClass`形式创建组件。  
+能用`React.Component`创建的组件的就尽量不用`React.createClass`形式创建组件。
 
-尽量使用类的方式创建组件。  
+尽量使用类的方式创建组件。
 
 除此之外，创建组件的形式选择还应该根据下面来决定：
 
 1. 只要有可能，尽量使用无状态组件创建形式(性能更好)。
 
-2. 否则（如需要state、生命周期方法等），使用`React.Component`这种ES6形式创建组件
+2. 否则（如需要state、生命周期方法等），使用`React.Component`这种ES6形式创建组件。
+
+#### Tips:
+
+> 无状态组件内部其实是可以使用ref功能的，虽然不能通过this.refs访问到，但是可以通过将ref内容保存到无状态组件内部的一个本地变量中获取到。
+
+例如下面这段代码可以使用 ref 来获取组件挂载到 Dom 中后所指向的Dom元素：
+
+```javascript
+function TestComp(props){
+    let ref;
+    return (
+      <div>
+        <div ref={(node) => ref = node}>
+            ...
+        </div>
+    </div>
+  );
+}
+```
 
 --------------------------------------------------------------------------------
+
+## 6\. React单向数据流
+
+React组件是一个状态机，每个组件内部都有自己的状态(state)，其状态只在内部作用域下操作修改。多个组件之间可以是复合的关系，即从属组件关系，React组件提供设置组件属性(props)，属性可以从主组件获取传递到各属组件。
+
+> 主组件与属组件通信，最简单的方式是通过props,主组件通过props传递回调函数给属组件，在回调函数里可以更新state,触发组件重绘；在属组件中调用回调函数，也可以传入数据参数。
+
+**PROPS**
+
+props即属性，我们可以给React组件设置属性，属性值可以是任意JavaScript数据类型，且在组件内应该是只读的。
+
+- this.props
+
+我们可以通过this.props访问到所有组件属性，但是该属性值是只读的。如果要改变请使用state。
+
+- 挂载组件属性
+
+可以在挂载组件时传入组件props，指定其属性值：
+
+```javascript
+let HelloReact = React.createClass({
+       render: function() {
+           return (
+               <h1>{this.props.greetWord}</h1>
+           );
+       }   
+   });
+
+   let greet = "Hello, React";
+   React.render(
+       <HelloReact greetWord={greet} />,
+       document.querySelector('body')
+     );
+```
+
+```javascript
+class HelloReact extends React.Component{
+    constructor(props){
+      super(props)
+    }
+    render() {
+       return (
+           <h1>{this.props.greetWord}</h1>
+       );
+    }   
+   };
+
+   let greet = "Hello, React";
+   React.render(
+       <HelloReact greetWord={greet} />,
+       document.querySelector('body')
+     );
+```
+
+**STATE**
+
+我们说每一个组件都是一个状态机，管理着各自的状态，就是所谓的state，state只存在于组件的内部。
+
+- this.state
+
+可以通过this.state访问组件状态值。
+
+- getInitialState (ES5)
+
+React组件state默认是null，在定义组件类时我们可以定义getInitialState方法指定组件初始state值。
+
+- constructor (ES6)
+
+在ES6中，我们更加推崇构造函数的写法，下面是例子。
+
+```javascript
+class example extends React.Component{
+  constructor(props){
+    super(props);
+    // 设置 initial state
+    this.state = {
+        name: props.name || 'LZX'
+    };
+  }
+  render(){
+    return (
+      <div>{this.state.name}</div>
+    );
+  }
+}
+```
+
+> 更多例子请查看第5章，在上一章节我们已经讲得很详细了。但是我觉得还是有必要把props和state拆分出一个章节讲。
+
+## 7\. 一个井字棋游戏
+
+接下来我们来一个井字棋游戏小例子:
+
+> 我在这里就只贴出代码了，请自行查看 [完整教程](https://discountry.github.io/react/tutorial/tutorial.html#开始编码)
+
+> 我们现在来说一下需求，我们现在有3个组件：<br>
+> Square<br>
+> Board<br>
+> Game<br>
+> Square 组件代表一个单独的 `<button>`，Board 组件包含了9个squares，也就是棋盘的9个格子。Game 组件则为我们即将要编写的代码预留了一些位置。现在这几个组件都是不具备任何的交互功能的。
+
+```javascript
+function Square(props) {
+  return (
+    <button className="square" onClick={props.onClick}>
+      {props.value}
+    </button>
+  );
+}
+
+class Board extends React.Component {
+  renderSquare(i) {
+    return (
+      <Square
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
+      />
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <div className="board-row">
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
+        </div>
+        <div className="board-row">
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
+        </div>
+        <div className="board-row">
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+          {this.renderSquare(8)}
+        </div>
+      </div>
+    );
+  }
+}
+
+class Game extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      history: [
+        {
+          squares: Array(9).fill(null)
+        }
+      ],
+      stepNumber: 0,
+      xIsNext: true
+    };
+  }
+
+  handleClick(i) {
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? "X" : "O";
+    this.setState({
+      history: history.concat([
+        {
+          squares: squares
+        }
+      ]),
+      stepNumber: history.length,
+      xIsNext: !this.state.xIsNext
+    });
+  }
+
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: step % 2 ? false : true
+    });
+  }
+
+  render() {
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = calculateWinner(current.squares);
+
+    const moves = history.map((step, move) => {
+      const desc = move ? "Move #" + move : "Game start";
+      return (
+        <li key={move}>
+          <a href="#" onClick={() => this.jumpTo(move)}>{desc}</a>
+        </li>
+      );
+    });
+
+    let status;
+    if (winner) {
+      status = "Winner: " + winner;
+    } else {
+      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+    }
+
+    return (
+      <div className="game">
+        <div className="game-board">
+          <Board
+            squares={current.squares}
+            onClick={i => this.handleClick(i)}
+          />
+        </div>
+        <div className="game-info">
+          <div>{status}</div>
+          <ol>{moves}</ol>
+        </div>
+      </div>
+    );
+  }
+}
+
+// ========================================
+
+ReactDOM.render(<Game />, document.getElementById("root"));
+
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
+```
+
+> 我在这里就只贴出js代码，请自行查看：<br>
+> [完整教程](https://discountry.github.io/react/tutorial/tutorial.html#开始编码)<br>
+> [完整代码以及效果](https://codepen.io/gaearon/pen/gWWZgR?editors=0010)
