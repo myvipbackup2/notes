@@ -645,7 +645,7 @@ console.log(set.size); // 56
 ```javascript
 //使用Set很方便的就可以完成
 const str = 'abcabcbb';
-const newStr = new Set(str);
+const newStr = new Set(str);  //'abc'
 console.log(newStr.size);  //3
 ```
 
@@ -722,7 +722,7 @@ console.log(o1);  // { a: 1, b: 2, c: 3 }, 注意目标对象自身也会改变�
 ```javascript
     let obj = {a: {b: {c: 1}}};
     function find(obj, str) {
-        let result = Object.assign({}, obj);
+        let result = Object.assign({}, obj);  //这里进行一次浅拷贝，如果直接把obj赋值给一个新的变量是对obj的引用哦！要注意！
         let arr = str.split('.');
         for (let i = 0, len = arr.length; i < len; i++) {
             result = result[arr[i]]
@@ -741,7 +741,7 @@ console.log(o1);  // { a: 1, b: 2, c: 3 }, 注意目标对象自身也会改变�
     console.log(find(obj, 'a.b.c'))  //undefined
 ```
 
-一开始我是用后面那个简便的方法的，以为obj["prop"]可以直接取到结果1，结果出来却是`undefined`，估计面试官问的也是这个吧？后来老老实实用递归出来，如果有更简便的方法欢迎issue。
+这里首先要注意，直接`newObj = obj`的话是对`obj`的引用！当心有坑！一开始我是用后面那个简便的方法的，以为obj["prop"]可以直接取到结果1，结果出来却是`undefined`，估计面试官问的也是这个吧？后来老老实实用递归出来，如果有更简便的方法欢迎issue。
 
 > 详细用法和说明请查看文档：[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
 
