@@ -1,3 +1,5 @@
+<link href="http://kevinburke.bitbucket.org/markdowncss/markdown.css" rel="stylesheet"></link>
+
 # Javascript代码段合集
 
 > 花30秒或者更短的时间就能理解的Javascript代码段
